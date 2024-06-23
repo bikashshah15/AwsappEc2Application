@@ -40,6 +40,9 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
+      - name: Check Docker Permissions
+        run: sudo usermod -aG docker $(whoami)
+
       - name: Pull Image from Docker Hub
         run: docker pull bikashshah15/testspringbootapp1:latest
 
