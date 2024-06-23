@@ -1,5 +1,3 @@
-
-
 name: Java CI with Maven and deploy to EC2
 
 on:
@@ -10,38 +8,40 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn clean install -DskipTests
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
 
-    - name: Login to Docker Hub
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - name: Login to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
-    - name: Build Docker image
-      run: docker build -t bikashshah15/testspringbootapp1 .
+      - name: Build Docker image
+        run: docker build -t bikashshah15/testspringbootapp1 .
 
-    - name: Publish image to Docker Hub
-      run: docker push bikashshah15/testspringbootapp1:latest
+      - name: Publish image to Docker Hub
+        run: docker push bikashshah15/testspringbootapp1:latest
 
   deploy:
     needs: build
     runs-on: self-hosted
+
     steps:
-      - name: Check Docker Permissions
-        run: sudo usermod -aG docker $(whoami)
+      - name: Check Docker permissions
+        run: |
+          id
+          ls -l /var/run/docker.sock
 
       - name: Pull Image from Docker Hub
         run: docker pull bikashshah15/testspringbootapp1:latest
